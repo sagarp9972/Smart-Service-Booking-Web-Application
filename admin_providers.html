@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+{% block title %}Service Providers — Admin{% endblock %}
+{% block content %}
+<div class="container py-4">
+ <div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0">👷 Service Providers</h2>
+  <div class="d-flex gap-2">
+   <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+   <a href="{% url 'admin_add_provider' %}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>Add Provider</a>
+  </div>
+ </div>
+ <div class="card shadow-sm">
+  <div class="table-responsive">
+   <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+     <tr><th>Photo</th><th>Name</th><th>Category</th><th>Specialization</th><th>Phone</th><th>Exp</th><th>Rating</th><th>Status</th><th>Verified</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+     {% for p in providers %}
+     <tr>
+      <td>
+       {% if p.profile_pic %}<img src="{{ p.profile_pic.url }}" class="rounded-circle" width="40" height="40" style="object-fit:cover">
+       {% else %}<div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center" style="width:40px;height:40px"><i class="fas fa-user text-white"></i></div>{% endif %}
+      </td>
+      <td><strong>{{ p.full_name }}</strong><br><small class="text-muted">{{ p.workplace_name }}</small></td>
+      <td><span class="badge bg-primary">{{ p.category }}</span></td>
+      <td><small>{{ p.specialization|default:"—" }}</small></td>
+      <td><a href="tel:{{ p.phone }}">{{ p.phone }}</a></td>
+      <td>{{ p.experience_years }} yrs</td>
+      <td>
+       {% with r=p.avg_rating %}
+       <i class="fas fa-star text-warning" style="font-size:.8rem"></i> {{ r }} <small class="text-muted">({{ p.total_reviews }})</small>
+       {% endwith %}
+      </td>
+      <td>
+       {% if p.availability == 'available' %}<span class="badge bg-success">Available</span>
+       {% elif p.availability == 'busy' %}<span class="badge bg-warning text-dark">Busy</span>
+       {% else %}<span class="badge bg-secondary">Offline</span>{% endif %}
+      </td>
+      <td>{% if p.verified %}<span class="badge bg-success"><i class="fas fa-check"></i> Yes</span>{% else %}<span class="badge bg-danger">No</span>{% endif %}</td>
+      <td><a href="{% url 'provider_detail' p.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye"></i></a></td>
+     </tr>
+     {% empty %}
+     <tr><td colspan="10" class="text-center text-muted py-4">No providers yet. <a href="{% url 'admin_add_provider' %}">Add one</a></td></tr>
+     {% endfor %}
+    </tbody>
+   </table>
+  </div>
+ </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'core/base.html' %}
+{% block title %}Book {{ service.name }} — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-md-8">
+ <nav class="mb-4"><ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'services' %}">Services</a></li>
+  <li class="breadcrumb-item active">Book {{ service.name }}</li>
+ </ol></nav>
+ <div class="card shadow-sm p-4">
+  <h3 class="fw-bold mb-1">Book Service</h3>
+  <p class="text-muted mb-4">Fill in the details to confirm your appointment.</p>
+  <div class="p-3 rounded mb-4" style="background:#EEF2FF;border:1px solid #C7D2FE">
+   <div class="row align-items-center">
+    <div class="col-8">
+     <span class="badge bg-primary mb-1">{{ service.category.emoji }} {{ service.category.name }}</span>
+     <h5 class="fw-bold mb-0">{{ service.name }}</h5>
+     {% if service.specialization %}<small class="text-muted"><i class="fas fa-user-md me-1"></i>{{ service.specialization }}</small>{% endif %}
+     <small class="text-muted d-block"><i class="far fa-clock me-1"></i>{{ service.duration_minutes }} min</small>
+    </div>
+    <div class="col-4 text-end"><h4 class="fw-bold mb-0 ss-price">₹{{ service.price }}</h4><small class="text-muted">per session</small></div>
+   </div>
+   {% if service.provider %}
+   <hr class="my-2">
+   <div class="d-flex align-items-center gap-2">
+    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width:32px;height:32px;flex-shrink:0"><i class="fas fa-user text-white" style="font-size:.75rem"></i></div>
+    <div><small class="fw-bold">{{ service.provider.full_name }}</small>{% if service.provider.experience_years %}<small class="text-muted ms-1">· {{ service.provider.experience_years }} yrs exp</small>{% endif %}</div>
+    <a href="{% url 'provider_detail' service.provider.pk %}" class="btn btn-outline-primary btn-sm ms-auto" style="font-size:.75rem">View Profile</a>
+   </div>{% endif %}
+  </div>
+  <div id="service-id-meta" data-id="{{ service.pk }}" style="display:none"></div>
+  <form method="POST" id="bookingForm" novalidate>{% csrf_token %}
+   <input type="hidden" id="slot-id-hidden" name="slot_id" value="">
+   <input type="hidden" id="id_time" name="time" value="">
+   <div class="mb-4">
+    <label class="form-label fw-semibold"><i class="fas fa-calendar me-1 ss-icon"></i>Step 1 — Select Date</label>
+    <input type="date" name="date" id="booking-date" class="form-control form-control-lg" min="{{ today }}" value="{{ selected_date|default:today }}" required>
+   </div>
+   <div class="mb-4">
+    <label class="form-label fw-semibold"><i class="fas fa-clock me-1 ss-icon"></i>Step 2 — Select Time Slot</label>
+    <div class="d-flex gap-3 mb-2">
+     <small class="text-muted"><i class="fas fa-sun me-1 text-warning"></i>Morning: 9AM–12PM</small>
+     <small class="text-muted"><i class="fas fa-cloud me-1 text-info"></i>Afternoon: 12PM–3PM</small>
+     <small class="text-muted"><i class="fas fa-moon me-1 text-primary"></i>Evening: 3PM–6PM</small>
+    </div>
+    <div id="slots-container" class="mt-2">
+     <div class="p-3 rounded text-center" style="background:#f8f9fa;border:1px dashed #ccc">
+      <p class="text-muted small mb-0"><i class="fas fa-hand-point-up me-1"></i>Select a date above to see available time slots</p>
+     </div>
+    </div>
+    <div id="slot-error" class="text-danger small mt-1" style="display:none"><i class="fas fa-exclamation-circle me-1"></i>Please select a time slot.</div>
+   </div>
+   {% if service.category.name == 'Doctor' %}
+   <div class="mb-3">
+    <div class="form-check form-switch">
+     <input class="form-check-input" type="checkbox" name="is_emergency" id="emergCheck">
+     <label class="form-check-label fw-semibold text-danger" for="emergCheck"><i class="fas fa-ambulance me-1"></i>Emergency appointment</label>
+    </div>
+   </div>{% endif %}
+   <div class="mb-4">
+    <label class="form-label fw-semibold"><i class="fas fa-sticky-note me-1 ss-icon"></i>Notes <span class="text-muted fw-normal">(Optional)</span></label>
+    <textarea name="notes" class="form-control" rows="2" placeholder="Any special requests..."></textarea>
+   </div>
+   <div class="mb-4">
+    <label class="form-label fw-semibold"><i class="fas fa-credit-card me-1 ss-icon"></i>Step 3 — Payment Method</label>
+    {% if online_only %}<div class="alert alert-info py-2 mb-2 small"><i class="fas fa-info-circle me-1"></i>This category requires <strong>online payment</strong>. Cash is not accepted.</div>{% endif %}
+    <div class="row g-2 mt-1">
+     {% if not online_only %}
+     <div class="col-4"><input type="radio" class="btn-check" name="payment_method" id="pay_cash" value="cash" checked><label class="btn btn-outline-success w-100 py-3" for="pay_cash"><i class="fas fa-money-bill-wave d-block mb-1 fa-lg"></i><span class="small fw-bold">Cash</span><br><span style="font-size:.65rem" class="text-muted">Pay on service</span></label></div>{% endif %}
+     <div class="col-4"><input type="radio" class="btn-check" name="payment_method" id="pay_gpay" value="gpay" {% if online_only %}checked{% endif %}><label class="btn btn-outline-primary w-100 py-3" for="pay_gpay"><i class="fab fa-google d-block mb-1 fa-lg"></i><span class="small fw-bold">Google Pay</span><br><span style="font-size:.65rem" class="text-muted">UPI payment</span></label></div>
+     <div class="col-4"><input type="radio" class="btn-check" name="payment_method" id="pay_phonepe" value="phonepe"><label class="btn btn-outline-primary w-100 py-3" for="pay_phonepe" style="border-color:#5f259f;color:#5f259f"><i class="fas fa-mobile-alt d-block mb-1 fa-lg"></i><span class="small fw-bold">PhonePe</span><br><span style="font-size:.65rem" class="text-muted">UPI payment</span></label></div>
+     <div class="col-4"><input type="radio" class="btn-check" name="payment_method" id="pay_paytm" value="paytm"><label class="btn btn-outline-info w-100 py-3" for="pay_paytm"><i class="fas fa-wallet d-block mb-1 fa-lg"></i><span class="small fw-bold">Paytm</span><br><span style="font-size:.65rem" class="text-muted">UPI payment</span></label></div>
+     <div class="col-4"><input type="radio" class="btn-check" name="payment_method" id="pay_upi" value="upi"><label class="btn btn-outline-warning w-100 py-3" for="pay_upi"><i class="fas fa-university d-block mb-1 fa-lg"></i><span class="small fw-bold">Any UPI</span><br><span style="font-size:.65rem" class="text-muted">BHIM / Bank</span></label></div>
+     <div class="col-4"><input type="radio" class="btn-check" name="payment_method" id="pay_card" value="card"><label class="btn btn-outline-dark w-100 py-3" for="pay_card"><i class="fas fa-credit-card d-block mb-1 fa-lg"></i><span class="small fw-bold">Card</span><br><span style="font-size:.65rem" class="text-muted">Debit/Credit</span></label></div>
+    </div>
+    <div id="pay-info-cash" class="alert alert-success py-2 mt-2 mb-0 small {% if online_only %}d-none{% endif %}"><i class="fas fa-info-circle me-1"></i>Pay cash when provider arrives. No advance needed.</div>
+    <div id="pay-info-online" class="alert alert-primary py-2 mt-2 mb-0 small {% if not online_only %}d-none{% endif %}"><i class="fas fa-mobile-alt me-1"></i>You will be taken to a payment page with UPI apps after confirming.</div>
+   </div>
+   <div class="p-3 rounded mb-4" style="background:#f0fdf4;border:1px solid #bbf7d0">
+    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Service price</span><strong>₹{{ service.price }}</strong></div>
+    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Duration</span><strong>{{ service.duration_minutes }} min</strong></div>
+    <hr class="my-2">
+    <div class="d-flex justify-content-between"><span class="fw-bold">Total</span><strong class="fs-5 ss-price">₹{{ service.price }}</strong></div>
+   </div>
+   <div class="alert alert-success py-2 mb-3 small"><i class="fas fa-bolt me-2"></i><strong>Instant Confirmation!</strong> Cash → confirmed immediately. UPI/Card → confirmed after payment.</div>
+   <div class="d-flex gap-2">
+    <a href="{% url 'service_detail' service.pk %}" class="btn btn-outline-secondary flex-fill"><i class="fas fa-arrow-left me-1"></i>Cancel</a>
+    <button type="submit" id="confirmBtn" class="btn btn-primary flex-fill btn-lg fw-bold"><i class="fas fa-check-circle me-1"></i>Confirm Booking</button>
+   </div>
+  </form>
+ </div>
+</div></div></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var dateInp  = document.getElementById('booking-date');
+  var slotsBox = document.getElementById('slots-container');
+  var slotHid  = document.getElementById('slot-id-hidden');
+  var timeHid  = document.getElementById('id_time');
+  var slotErr  = document.getElementById('slot-error');
+  var svcId    = document.getElementById('service-id-meta').dataset.id;
+
+  /* Convert "09:00 AM" or "01:30 PM" → 24-hour integer (FIXED) */
+  function getHour24(timeStr) {
+    var str   = timeStr.trim();           // "09:00 AM"
+    var space = str.lastIndexOf(' ');
+    var hm    = str.substring(0, space).split(':');
+    var ampm  = str.substring(space + 1).toUpperCase();
+    var hour  = parseInt(hm[0], 10);
+    if (ampm === 'PM' && hour !== 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour  = 0;
+    return hour;
+  }
+
+  /* Payment toggle */
+  document.querySelectorAll('input[name="payment_method"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      var cash = this.value === 'cash';
+      var ci = document.getElementById('pay-info-cash');
+      var oi = document.getElementById('pay-info-online');
+      if (ci) ci.classList.toggle('d-none', !cash);
+      if (oi) oi.classList.toggle('d-none', cash);
+    });
+  });
+
+  /* Build one group HTML */
+  function renderGroup(label, slots) {
+    if (!slots.length) return '';
+    var btns = slots.map(function (s) {
+      return '<button type="button" class="time-slot-btn' + (!s.available ? ' booked' : '') + '"' +
+        ' data-slot-id="' + s.id + '" data-time="' + s.time + '"' +
+        (!s.available ? ' disabled' : '') + '>' +
+        s.time + (!s.available ? ' <small>Full</small>' : '') + '</button>';
+    }).join('');
+    return '<div class="mb-4"><p class="fw-semibold mb-2" style="font-size:.88rem;color:#475569">' +
+      label + '</p><div class="d-flex flex-wrap gap-2">' + btns + '</div></div>';
+  }
+
+  /* Load slots AJAX */
+  function loadSlots(date) {
+    slotsBox.innerHTML = '<div class="p-3 text-center"><i class="fas fa-spinner fa-spin me-2 text-primary"></i><span class="text-muted">Loading...</span></div>';
+    slotHid.value = ''; timeHid.value = '';
+
+    fetch('/services/' + svcId + '/slots/?date=' + date)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.slots || !data.slots.length) {
+          slotsBox.innerHTML = '<div class="alert alert-warning py-2 mb-0">No available slots for this date. Try another date.</div>';
+          return;
+        }
+        /* ── CORRECT GROUPING using getHour24() ── */
+        var morning = [], afternoon = [], evening = [];
+        data.slots.forEach(function (s) {
+          var h = getHour24(s.time);  // properly converts AM/PM to 24h
+          if      (h >= 9  && h < 12) morning.push(s);
+          else if (h >= 12 && h < 15) afternoon.push(s);
+          else if (h >= 15 && h < 18) evening.push(s);
+        });
+        var html =
+          renderGroup('☀️ Morning &nbsp;(9:00 AM – 11:30 AM)',   morning)   +
+          renderGroup('⛅ Afternoon (12:00 PM – 2:30 PM)', afternoon) +
+          renderGroup('🌙 Evening &nbsp;(3:00 PM – 5:30 PM)',  evening);
+
+        if (!html.trim()) {
+          slotsBox.innerHTML = '<div class="alert alert-warning py-2 mb-0">All slots are booked for this date.</div>';
+          return;
+        }
+        slotsBox.innerHTML = html;
+        /* Click handler */
+        slotsBox.querySelectorAll('.time-slot-btn:not(.booked)').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            slotsBox.querySelectorAll('.time-slot-btn').forEach(function (b) { b.classList.remove('selected'); });
+            this.classList.add('selected');
+            slotHid.value = this.dataset.slotId;
+            timeHid.value = this.dataset.time;
+            if (slotErr) slotErr.style.display = 'none';
+          });
+        });
+      })
+      .catch(function () {
+        slotsBox.innerHTML = '<div class="alert alert-danger py-2 mb-0">Failed to load slots. Please refresh.</div>';
+      });
+  }
+
+  if (dateInp) {
+    dateInp.addEventListener('change', function () { if (this.value) loadSlots(this.value); });
+    if (dateInp.value) loadSlots(dateInp.value);
+  }
+
+  /* Form submit */
+  var form = document.getElementById('bookingForm');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      if (!slotHid.value) {
+        e.preventDefault();
+        if (slotErr) slotErr.style.display = 'block';
+        slotsBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      var btn = document.getElementById('confirmBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...'; }
+    });
+  }
+});
+</script>
+{% endblock %}

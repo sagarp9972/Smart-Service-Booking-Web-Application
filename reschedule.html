@@ -1,0 +1,122 @@
+{% extends 'core/base.html' %}
+{% block title %}Reschedule Booking — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-md-7">
+ <div class="d-flex align-items-center mb-4">
+  <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-outline-secondary btn-sm me-3">← Back</a>
+  <h3 class="fw-bold mb-0">Reschedule Booking</h3>
+ </div>
+ <div class="card shadow-sm p-4">
+  <div class="p-3 rounded mb-4" style="background:#EEF2FF;border:1px solid #C7D2FE">
+   <h5 class="fw-bold mb-1">{{ booking.service.name }}</h5>
+   <small class="text-muted">Current: {{ booking.date }} at {{ booking.time }}</small>
+  </div>
+  <div id="service-id-meta" data-id="{{ service.pk }}" style="display:none"></div>
+  <form method="POST" id="rescheduleForm" novalidate>{% csrf_token %}
+   <input type="hidden" id="slot-id-hidden" name="slot_id" value="">
+   <div class="mb-4">
+    <label class="form-label fw-semibold"><i class="fas fa-calendar me-1 ss-icon"></i>New Date</label>
+    <input type="date" id="booking-date" class="form-control form-control-lg" min="{{ today }}" required>
+   </div>
+   <div class="mb-4">
+    <label class="form-label fw-semibold"><i class="fas fa-clock me-1 ss-icon"></i>New Time Slot</label>
+    <div class="d-flex gap-3 mb-2">
+     <small class="text-muted"><i class="fas fa-sun me-1 text-warning"></i>Morning 9AM–12PM</small>
+     <small class="text-muted"><i class="fas fa-cloud me-1 text-info"></i>Afternoon 12PM–3PM</small>
+     <small class="text-muted"><i class="fas fa-moon me-1 text-primary"></i>Evening 3PM–6PM</small>
+    </div>
+    <div id="slots-container" class="mt-2">
+     <div class="p-3 text-center rounded" style="background:#f8f9fa;border:1px dashed #ccc">
+      <p class="text-muted small mb-0">Select a date to see available slots</p>
+     </div>
+    </div>
+    <div id="slot-error" class="text-danger small mt-1" style="display:none">Please select a time slot.</div>
+   </div>
+   <div class="d-flex gap-2">
+    <a href="{% url 'booking_detail' booking.pk %}" class="btn btn-outline-secondary flex-fill">Cancel</a>
+    <button type="submit" class="btn btn-warning flex-fill fw-bold btn-lg"><i class="fas fa-clock me-1"></i>Reschedule</button>
+   </div>
+  </form>
+ </div>
+</div></div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var dateInp  = document.getElementById('booking-date');
+  var slotsBox = document.getElementById('slots-container');
+  var slotHid  = document.getElementById('slot-id-hidden');
+  var slotErr  = document.getElementById('slot-error');
+  var svcId    = document.getElementById('service-id-meta').dataset.id;
+
+  function getHour24(timeStr) {
+    var str = timeStr.trim();
+    var space = str.lastIndexOf(' ');
+    var hm = str.substring(0, space).split(':');
+    var ampm = str.substring(space + 1).toUpperCase();
+    var hour = parseInt(hm[0], 10);
+    if (ampm === 'PM' && hour !== 12) hour += 12;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    return hour;
+  }
+
+  function renderGroup(label, slots) {
+    if (!slots.length) return '';
+    var btns = slots.map(function (s) {
+      return '<button type="button" class="time-slot-btn' + (!s.available ? ' booked' : '') + '"' +
+        ' data-slot-id="' + s.id + '" data-time="' + s.time + '"' +
+        (!s.available ? ' disabled' : '') + '>' + s.time + '</button>';
+    }).join('');
+    return '<div class="mb-3"><p class="fw-semibold mb-2" style="font-size:.88rem;color:#475569">' +
+      label + '</p><div class="d-flex flex-wrap gap-2">' + btns + '</div></div>';
+  }
+
+  function loadSlots(date) {
+    slotsBox.innerHTML = '<div class="p-3 text-center"><i class="fas fa-spinner fa-spin text-primary me-2"></i>Loading...</div>';
+    slotHid.value = '';
+    fetch('/services/' + svcId + '/slots/?date=' + date)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.slots || !data.slots.length) {
+          slotsBox.innerHTML = '<div class="alert alert-warning py-2 mb-0">No slots for this date.</div>';
+          return;
+        }
+        var morning = [], afternoon = [], evening = [];
+        data.slots.forEach(function (s) {
+          var h = getHour24(s.time);
+          if      (h >= 9  && h < 12) morning.push(s);
+          else if (h >= 12 && h < 15) afternoon.push(s);
+          else if (h >= 15 && h < 18) evening.push(s);
+        });
+        slotsBox.innerHTML =
+          renderGroup('☀️ Morning (9:00 AM – 11:30 AM)', morning) +
+          renderGroup('⛅ Afternoon (12:00 PM – 2:30 PM)', afternoon) +
+          renderGroup('🌙 Evening (3:00 PM – 5:30 PM)', evening);
+        slotsBox.querySelectorAll('.time-slot-btn:not(.booked)').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            slotsBox.querySelectorAll('.time-slot-btn').forEach(function (b) { b.classList.remove('selected'); });
+            this.classList.add('selected');
+            slotHid.value = this.dataset.slotId;
+            if (slotErr) slotErr.style.display = 'none';
+          });
+        });
+      }).catch(function () {
+        slotsBox.innerHTML = '<div class="alert alert-danger py-2 mb-0">Failed to load. Please refresh.</div>';
+      });
+  }
+
+  if (dateInp) {
+    dateInp.addEventListener('change', function () { if (this.value) loadSlots(this.value); });
+  }
+  var form = document.getElementById('rescheduleForm');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      if (!slotHid.value) {
+        e.preventDefault();
+        if (slotErr) slotErr.style.display = 'block';
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

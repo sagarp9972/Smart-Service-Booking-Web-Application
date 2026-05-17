@@ -1,0 +1,192 @@
+{% extends 'core/base.html' %}
+{% block title %}Booking #{{ booking.pk }} — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-md-9">
+ <div class="d-flex align-items-center mb-4">
+  <a href="{% url 'booking_history' %}" class="btn btn-outline-secondary btn-sm me-3">← My Bookings</a>
+  <h3 class="fw-bold mb-0">Booking #{{ booking.pk }}</h3>
+  <span class="ss-badge-{{ booking.status }} ms-3">{{ booking.get_status_display }}</span>
+ </div>
+ <div class="row g-3">
+  <div class="col-md-7">
+   <!-- Service Card -->
+   <div class="card shadow-sm p-4 mb-3">
+    <span class="badge bg-primary mb-2">{{ booking.service.category.emoji }} {{ booking.service.category.name }}</span>
+    <h4 class="fw-bold mb-1">{{ booking.service.name }}</h4>
+    {% if booking.service.specialization %}<p class="text-muted mb-2"><i class="fas fa-user-md me-1"></i>{{ booking.service.specialization }}</p>{% endif %}
+    <p class="text-muted small mb-0">Booked on {{ booking.created_at|date:"d M Y, g:i A" }}</p>
+   </div>
+
+   <!-- Provider Details (shown AFTER booking for Mechanic/Salon/Plumber/Electrician/Cleaner/Carpenter) -->
+   {% if booking.provider %}
+   {% if booking.service.category.name not in 'Doctor,Tutor' %}
+   <div class="card shadow-sm p-4 mb-3" style="border-left:4px solid #10B981">
+    <h5 class="fw-bold mb-3"><i class="fas fa-user-tie me-2 text-success"></i>Your Service Provider</h5>
+    <div class="d-flex align-items-start gap-3">
+     {% if booking.provider.profile_pic %}
+     <img src="{{ booking.provider.profile_pic.url }}" class="rounded-circle flex-shrink-0" width="64" height="64" style="object-fit:cover;border:3px solid #10B981">
+     {% else %}
+     <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width:64px;height:64px;background:#D1FAE5;border:3px solid #10B981;font-size:1.5rem">
+      {% if booking.service.category.name == 'Mechanic' %}🚗
+      {% elif booking.service.category.name == 'Salon' %}✂️
+      {% elif booking.service.category.name == 'Plumber' %}🔧
+      {% elif booking.service.category.name == 'Electrician' %}⚡
+      {% elif booking.service.category.name == 'Cleaner' %}🧹
+      {% elif booking.service.category.name == 'Carpenter' %}🪚
+      {% else %}👤{% endif %}
+     </div>{% endif %}
+     <div class="flex-grow-1">
+      <h5 class="fw-bold mb-1">{{ booking.provider.full_name }}</h5>
+      {% if booking.provider.specialization %}<p class="text-muted mb-2 small"><i class="fas fa-tools me-1"></i>{{ booking.provider.specialization }}</p>{% endif %}
+      <div class="row g-2">
+       <div class="col-6"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block"><i class="fas fa-phone me-1 text-primary"></i>Phone</small><a href="tel:{{ booking.provider.phone }}" class="fw-bold text-decoration-none">{{ booking.provider.phone }}</a></div></div>
+       {% if booking.provider.experience_years %}
+       <div class="col-6"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block"><i class="fas fa-briefcase me-1 text-primary"></i>Experience</small><strong>{{ booking.provider.experience_years }} Years</strong></div></div>{% endif %}
+       {% if booking.provider.education %}
+       <div class="col-12"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block"><i class="fas fa-graduation-cap me-1 text-primary"></i>Education / Certification</small><strong style="font-size:.85rem">{{ booking.provider.education }}</strong></div></div>{% endif %}
+       {% if booking.provider.workplace_name %}
+       <div class="col-12"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block"><i class="fas fa-store me-1 text-primary"></i>Shop / Workplace</small><strong>{{ booking.provider.workplace_name }}</strong>{% if booking.provider.workplace_address %}<br><small class="text-muted">{{ booking.provider.workplace_address }}</small>{% endif %}</div></div>{% endif %}
+       {% if booking.provider.about %}
+       <div class="col-12"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block"><i class="fas fa-info-circle me-1 text-primary"></i>About</small><span style="font-size:.85rem">{{ booking.provider.about }}</span></div></div>{% endif %}
+      </div>
+      <div class="mt-2">
+       {% if booking.provider.availability == 'available' %}<span class="badge bg-success">Available</span>
+       {% elif booking.provider.availability == 'busy' %}<span class="badge bg-warning text-dark">Busy</span>
+       {% else %}<span class="badge bg-secondary">Offline</span>{% endif %}
+       {% if booking.provider.verified %}<span class="badge bg-success ms-1"><i class="fas fa-check-circle me-1"></i>Verified</span>{% endif %}
+      </div>
+      <a href="{% url 'provider_detail' booking.provider.pk %}" class="btn btn-outline-success btn-sm mt-2">View Full Profile</a>
+     </div>
+    </div>
+   </div>
+   {% else %}
+   <!-- For Doctor/Tutor — provider shown before booking, just link here -->
+   <div class="card shadow-sm p-3 mb-3">
+    <h6 class="fw-bold mb-2"><i class="fas fa-user-tie me-2 ss-icon"></i>Service Provider</h6>
+    <div class="d-flex align-items-center gap-2">
+     <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width:40px;height:40px"><i class="fas fa-user text-white"></i></div>
+     <div><strong>{{ booking.provider.full_name }}</strong><br>
+      <small class="text-muted"><i class="fas fa-phone me-1"></i><a href="tel:{{ booking.provider.phone }}" class="text-decoration-none">{{ booking.provider.phone }}</a></small></div>
+     <a href="{% url 'provider_detail' booking.provider.pk %}" class="btn btn-outline-primary btn-sm ms-auto">Full Profile</a>
+    </div>
+   </div>{% endif %}{% endif %}
+
+   <!-- Appointment Details -->
+   <div class="card shadow-sm p-4 mb-3">
+    <h6 class="fw-bold mb-3"><i class="fas fa-calendar-check me-1 ss-icon"></i>Appointment Details</h6>
+    <div class="row g-2">
+     <div class="col-6"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block">Date</small><strong>{{ booking.date }}</strong></div></div>
+     <div class="col-6"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block">Time</small><strong>{{ booking.time }}</strong></div></div>
+     <div class="col-6"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block">Duration</small><strong>{{ booking.service.duration_minutes }} min</strong></div></div>
+     <div class="col-6"><div class="p-2 rounded" style="background:#f8f9fa"><small class="text-muted d-block">Payment</small><strong>{{ booking.get_payment_method_display }}</strong></div></div>
+     {% if booking.is_emergency %}<div class="col-12"><div class="p-2 rounded" style="background:#FEE2E2"><small class="text-danger d-block fw-bold"><i class="fas fa-ambulance me-1"></i>Emergency Appointment</small></div></div>{% endif %}
+    </div>
+   </div>
+
+   <!-- Payment Details -->
+   <div class="card shadow-sm p-4 mb-3">
+    <h6 class="fw-bold mb-3"><i class="fas fa-receipt me-1 ss-icon"></i>Payment</h6>
+    <div class="d-flex justify-content-between mb-1"><span class="text-muted">Service Price</span><strong>₹{{ booking.total_price }}</strong></div>
+    {% if booking.discount_amt > 0 %}<div class="d-flex justify-content-between mb-1"><span class="text-muted">Discount</span><span class="text-success">-₹{{ booking.discount_amt }}</span></div>{% endif %}
+    <hr class="my-2">
+    <div class="d-flex justify-content-between mb-2"><span class="fw-bold">Total</span><strong class="ss-price fs-5">₹{{ booking.get_final_price }}</strong></div>
+    <div>{% if booking.payment_status == 'paid' %}<span class="badge bg-success">Paid</span>
+     {% elif booking.payment_status == 'pending' %}<span class="badge bg-warning text-dark">Payment Pending</span>
+     {% else %}<span class="badge bg-danger">{{ booking.get_payment_status_display }}</span>{% endif %}
+     {% if booking.transaction_id %}<code class="ms-2 small">{{ booking.transaction_id }}</code>{% endif %}</div>
+    {% if booking.payment_status == 'pending' and booking.payment_method != 'cash' %}
+    <a href="{% url 'payment_page' booking.pk %}" class="btn btn-warning btn-sm mt-2 w-100 fw-bold"><i class="fas fa-credit-card me-1"></i>Complete Payment Now</a>{% endif %}
+   </div>
+
+   {% if booking.notes %}<div class="card shadow-sm p-3 mb-3"><h6 class="fw-bold mb-2"><i class="fas fa-sticky-note me-1 ss-icon"></i>Your Notes</h6><p class="text-muted mb-0">{{ booking.notes }}</p></div>{% endif %}
+
+   <!-- Timeline -->
+   <div class="card shadow-sm p-4 mb-3">
+    <h6 class="fw-bold mb-3"><i class="fas fa-stream me-1 ss-icon"></i>Booking Progress</h6>
+    <div class="booking-timeline">
+     <div class="timeline-step"><div class="timeline-dot {% if booking.status in 'pending,confirmed,rescheduled,in_progress,completed' %}done{% endif %}"></div><p class="mb-0 small fw-bold"><i class="fas fa-paper-plane me-1"></i>Booking Requested</p><small class="text-muted">{{ booking.created_at|date:"d M Y, g:i A" }}</small></div>
+     <div class="timeline-step"><div class="timeline-dot {% if booking.status in 'confirmed,rescheduled,in_progress,completed' %}done{% endif %}"></div><p class="mb-0 small fw-bold {% if booking.status not in 'confirmed,rescheduled,in_progress,completed' %}text-muted{% endif %}"><i class="fas fa-check-circle me-1"></i>Booking Confirmed</p></div>
+     <div class="timeline-step"><div class="timeline-dot {% if booking.status in 'in_progress,completed' %}done{% endif %}"></div><p class="mb-0 small fw-bold {% if booking.status not in 'in_progress,completed' %}text-muted{% endif %}"><i class="fas fa-tools me-1"></i>Service In Progress</p></div>
+     <div class="timeline-step"><div class="timeline-dot {% if booking.status == 'completed' %}done{% endif %}"></div><p class="mb-0 small fw-bold {% if booking.status != 'completed' %}text-muted{% endif %}"><i class="fas fa-star me-1"></i>Service Completed</p></div>
+    </div>
+   </div>
+
+   <!-- Actions -->
+   <div class="d-flex gap-2 flex-wrap mb-3">
+    {% if booking.status in 'pending,confirmed' %}<a href="{% url 'reschedule_booking' booking.pk %}" class="btn btn-outline-warning btn-sm"><i class="fas fa-clock me-1"></i>Reschedule</a>
+    <a href="{% url 'cancel_booking' booking.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Cancel?')"><i class="fas fa-times me-1"></i>Cancel</a>{% endif %}
+    <a href="{% url 'booking' booking.service.pk %}" class="btn btn-primary btn-sm"><i class="fas fa-redo me-1"></i>Book Again</a>
+   </div>
+
+   <!-- Review Section - ONLY for completed bookings -->
+   {% if can_review %}
+   <div class="card shadow-sm p-4 mb-3" style="border-left:4px solid #F59E0B">
+    <h5 class="fw-bold mb-3"><i class="fas fa-star me-1 text-warning"></i>Rate This Service</h5>
+    <form method="POST" action="{% url 'add_review' booking.service.pk %}" novalidate>{% csrf_token %}
+     <div class="mb-3">
+      <label class="form-label fw-semibold">Select Rating (tap a star)</label>
+      <div id="star-rating-ui" class="mb-2 d-flex gap-2"></div>
+      <input type="hidden" id="id_rating" name="rating" value="">
+      <div id="rating-error" class="text-danger small" style="display:none">Please select a star rating.</div>
+     </div>
+     <div class="mb-3"><label class="form-label fw-semibold">Your Review <span class="text-muted fw-normal">(optional)</span></label>
+      <textarea name="comment" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+     </div>
+     <button type="submit" class="btn btn-warning fw-bold px-4" onclick="return validateRating()"><i class="fas fa-paper-plane me-1"></i>Submit Review</button>
+    </form>
+   </div>
+   {% elif booking.status == 'completed' and has_review %}
+   <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>You have already reviewed this service. Thank you!</div>
+   {% elif booking.status != 'completed' %}
+   <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Review available after service completion.</div>{% endif %}
+  </div>
+
+  <!-- Chat -->
+  <div class="col-md-5">
+   <div class="card shadow-sm" style="height:500px;display:flex;flex-direction:column">
+    <div class="p-3 border-bottom"><h6 class="fw-bold mb-0"><i class="fas fa-comments me-2 ss-icon"></i>Chat</h6><small class="text-muted">Send message to provider</small></div>
+    <div class="p-3 flex-grow-1 overflow-auto" id="chat-box">
+     {% for msg in messages_list %}
+     <div class="mb-3 {% if msg.sender == request.user %}text-end{% endif %}">
+      <div class="d-inline-block px-3 py-2 rounded-3 {% if msg.sender == request.user %}bg-primary text-white{% else %}bg-light text-dark{% endif %}" style="max-width:85%;font-size:.88rem">{{ msg.content }}</div>
+      <div><small class="text-muted" style="font-size:.72rem">{{ msg.sender.first_name|default:msg.sender.username }} · {{ msg.created_at|date:"g:i A" }}</small></div>
+     </div>
+     {% empty %}<div class="text-center py-4"><i class="fas fa-comments fa-3x text-muted mb-2 d-block"></i><p class="text-muted small">No messages yet.</p></div>{% endfor %}
+    </div>
+    <div class="p-3 border-top">
+     <form method="POST" action="{% url 'send_message' booking.pk %}" class="d-flex gap-2">{% csrf_token %}
+      <input type="text" name="content" class="form-control form-control-sm" placeholder="Type message..." autocomplete="off">
+      <button type="submit" class="btn btn-primary btn-sm px-3"><i class="fas fa-paper-plane"></i></button>
+     </form>
+    </div>
+   </div>
+  </div>
+ </div>
+</div></div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  const starUI=document.getElementById('star-rating-ui');
+  const ratingInp=document.getElementById('id_rating');
+  if(starUI&&ratingInp){
+    for(let i=1;i<=5;i++){
+      const s=document.createElement('i');
+      s.className='fas fa-star fa-2x'; s.style.cursor='pointer'; s.style.color='#D1D5DB'; s.dataset.v=i;
+      s.addEventListener('click',function(){ratingInp.value=this.dataset.v;paint(this.dataset.v);document.getElementById('rating-error').style.display='none';});
+      s.addEventListener('mouseover',function(){paint(this.dataset.v);});
+      starUI.appendChild(s);
+    }
+    starUI.addEventListener('mouseleave',()=>paint(ratingInp.value||0));
+    function paint(v){starUI.querySelectorAll('i').forEach((s,i)=>s.style.color=i<v?'#F59E0B':'#D1D5DB');}
+  }
+  const cb=document.getElementById('chat-box');
+  if(cb)cb.scrollTop=cb.scrollHeight;
+});
+function validateRating(){
+  const v=document.getElementById('id_rating').value;
+  if(!v){document.getElementById('rating-error').style.display='block';return false;}
+  return true;
+}
+</script>
+{% endblock %}

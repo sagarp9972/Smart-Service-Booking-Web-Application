@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+{% block title %}My Bookings — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5">
+ <div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0"><i class="fas fa-calendar-check me-2 ss-icon"></i>My Bookings</h2>
+  <a href="{% url 'services' %}" class="btn btn-primary"><i class="fas fa-plus me-1"></i>Book New Service</a>
+ </div>
+ <div class="row g-3 mb-4">
+  <div class="col-6 col-md-2"><div class="card text-center p-3"><h4 class="fw-bold ss-price mb-0">{{ stats.total }}</h4><small class="text-muted">Total</small></div></div>
+  <div class="col-6 col-md-2"><div class="card text-center p-3" style="background:#FEF3C7"><h4 class="fw-bold mb-0" style="color:#92400E">{{ stats.pending }}</h4><small class="text-muted">Pending</small></div></div>
+  <div class="col-6 col-md-3"><div class="card text-center p-3" style="background:#D1FAE5"><h4 class="fw-bold mb-0" style="color:#065F46">{{ stats.confirmed }}</h4><small class="text-muted">Confirmed</small></div></div>
+  <div class="col-6 col-md-3"><div class="card text-center p-3" style="background:#DBEAFE"><h4 class="fw-bold mb-0" style="color:#1E40AF">{{ stats.completed }}</h4><small class="text-muted">Completed</small></div></div>
+  <div class="col-6 col-md-2"><div class="card text-center p-3" style="background:#FEE2E2"><h4 class="fw-bold mb-0" style="color:#991B1B">{{ stats.cancelled }}</h4><small class="text-muted">Cancelled</small></div></div>
+ </div>
+ <div class="d-flex gap-2 mb-4 flex-wrap">
+  <a href="{% url 'booking_history' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+  <a href="?status=pending"   class="btn btn-sm {% if status_filter == 'pending'   %}btn-warning text-dark{% else %}btn-outline-secondary{% endif %}">Pending</a>
+  <a href="?status=confirmed" class="btn btn-sm {% if status_filter == 'confirmed' %}btn-success{% else %}btn-outline-secondary{% endif %}">Confirmed</a>
+  <a href="?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-info text-white{% else %}btn-outline-secondary{% endif %}">Completed</a>
+  <a href="?status=cancelled" class="btn btn-sm {% if status_filter == 'cancelled' %}btn-danger{% else %}btn-outline-secondary{% endif %}">Cancelled</a>
+ </div>
+ {% if bookings %}
+ <div class="row g-3">
+  {% for bk in bookings %}
+  <div class="col-12">
+   <div class="card shadow-sm p-3">
+    <div class="row align-items-center g-2">
+     <div class="col-md-4">
+      <span class="badge bg-primary mb-1" style="font-size:.7rem">{{ bk.service.category.emoji }} {{ bk.service.category.name }}</span>
+      <h5 class="fw-bold mb-1">{{ bk.service.name }}</h5>
+      {% if bk.service.specialization %}<small class="text-muted d-block"><i class="fas fa-user-md me-1"></i>{{ bk.service.specialization }}</small>{% endif %}
+     </div>
+     <div class="col-md-3">
+      <p class="mb-0 small"><i class="far fa-calendar me-1 text-primary"></i>{{ bk.date }}</p>
+      <p class="mb-0 small"><i class="far fa-clock me-1 text-primary"></i>{{ bk.time }}</p>
+      <p class="mb-0 small"><i class="fas fa-credit-card me-1 text-primary"></i>{{ bk.get_payment_method_display }}</p>
+     </div>
+     <div class="col-md-2 text-center"><span class="ss-badge-{{ bk.status }}">{{ bk.get_status_display }}</span></div>
+     <div class="col-md-1 text-center"><strong class="ss-price">₹{{ bk.get_final_price }}</strong></div>
+     <div class="col-md-2 text-end d-flex flex-column gap-1">
+      <a href="{% url 'booking_detail' bk.pk %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-eye me-1"></i>Details</a>
+      {% if bk.provider %}
+      <a href="{% url 'provider_detail' bk.provider.pk %}" class="btn btn-outline-info btn-sm" style="font-size:.75rem"><i class="fas fa-user-tie me-1"></i>Provider</a>
+      {% endif %}
+      {% if bk.payment_status == 'pending' and bk.payment_method != 'cash' %}
+      <a href="{% url 'payment_page' bk.pk %}" class="btn btn-warning btn-sm" style="font-size:.75rem"><i class="fas fa-credit-card me-1"></i>Pay Now</a>
+      {% endif %}
+      {% if bk.status == 'pending' or bk.status == 'confirmed' %}
+      <a href="{% url 'cancel_booking' bk.pk %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Cancel?')"><i class="fas fa-times me-1"></i>Cancel</a>
+      {% endif %}
+     </div>
+    </div>
+   </div>
+  </div>{% endfor %}
+ </div>
+ {% else %}
+ <div class="text-center py-5">
+  <i class="fas fa-calendar-times fa-4x text-muted mb-3 d-block"></i>
+  <h5 class="text-muted">No bookings found.</h5>
+  <a href="{% url 'services' %}" class="btn btn-primary mt-2"><i class="fas fa-search me-1"></i>Browse Services</a>
+ </div>{% endif %}
+</div>{% endblock %}

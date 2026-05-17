@@ -1,0 +1,110 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ provider.full_name }} — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5">
+ <nav class="mb-4"><ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'services' %}">Services</a></li>
+  <li class="breadcrumb-item active">{{ provider.full_name }}</li>
+ </ol></nav>
+ <div class="row g-4">
+  <div class="col-md-4">
+   <div class="card shadow-sm p-4 text-center mb-3">
+    {% if provider.profile_pic %}
+    <img src="{{ provider.profile_pic.url }}" class="rounded-circle mx-auto mb-3 d-block" style="width:120px;height:120px;object-fit:cover;border:4px solid #4F46E5">
+    {% else %}
+    <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width:120px;height:120px;background:#EEF2FF;border:4px solid #4F46E5;font-size:3rem">
+     {{ provider.category.emoji }}
+    </div>{% endif %}
+    <h4 class="fw-bold mb-1">{{ provider.full_name }}</h4>
+    {% if provider.specialization %}<p class="text-muted mb-2 small"><i class="fas fa-star me-1"></i>{{ provider.specialization }}</p>{% endif %}
+    <span class="badge bg-primary mb-2">{{ provider.category }}</span>
+    {% if provider.verified %}<span class="badge bg-success ms-1 mb-2"><i class="fas fa-check-circle me-1"></i>Verified</span>{% endif %}
+    <div class="mb-3">
+     {% if provider.availability == 'available' %}<span class="badge bg-success px-3 py-2"><i class="fas fa-circle me-1" style="font-size:.5rem"></i>Available Now</span>
+     {% elif provider.availability == 'busy' %}<span class="badge bg-warning text-dark px-3 py-2">Currently Busy</span>
+     {% else %}<span class="badge bg-secondary px-3 py-2">Offline</span>{% endif %}
+    </div>
+    <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+     {% with r=provider.avg_rating %}
+     {% for i in "12345" %}<i class="fas fa-star" style="color:{% if forloop.counter <= r %}#F59E0B{% else %}#D1D5DB{% endif %}"></i>{% endfor %}
+     <span class="fw-bold">{{ r }}</span><span class="text-muted">({{ provider.total_reviews }})</span>
+     {% endwith %}
+    </div>
+    <hr>
+    <ul class="list-unstyled text-start mb-0">
+     <li class="mb-2"><i class="fas fa-phone me-2 text-primary"></i><a href="tel:{{ provider.phone }}" class="text-decoration-none fw-bold">{{ provider.phone }}</a></li>
+     {% if provider.email %}<li class="mb-2"><i class="fas fa-envelope me-2 text-primary"></i><a href="mailto:{{ provider.email }}" class="text-decoration-none small">{{ provider.email }}</a></li>{% endif %}
+     {% if provider.emergency_contact %}<li class="mb-2"><i class="fas fa-ambulance me-2 text-danger"></i><a href="tel:{{ provider.emergency_contact }}" class="text-decoration-none text-danger fw-bold">{{ provider.emergency_contact }}</a><small class="text-muted ms-1">(Emergency)</small></li>{% endif %}
+     {% if provider.workplace_name %}<li class="mb-2"><i class="fas fa-building me-2 text-primary"></i><strong>{{ provider.workplace_name }}</strong></li>{% endif %}
+     {% if provider.workplace_address %}<li class="mb-2"><i class="fas fa-map-marker-alt me-2 text-primary"></i><small>{{ provider.workplace_address }}</small></li>{% endif %}
+     {% if provider.languages %}<li class="mb-2"><i class="fas fa-language me-2 text-primary"></i><small>{{ provider.languages }}</small></li>{% endif %}
+    </ul>
+   </div>
+   <div class="card shadow-sm p-3">
+    <div class="row g-2 text-center">
+     <div class="col-4"><div class="p-2 rounded" style="background:#EEF2FF"><h5 class="fw-bold mb-0 ss-price">{{ provider.experience_years }}</h5><small class="text-muted">Yrs Exp</small></div></div>
+     <div class="col-4"><div class="p-2 rounded" style="background:#D1FAE5"><h5 class="fw-bold mb-0" style="color:#065F46">{{ bookings_count }}</h5><small class="text-muted">Done</small></div></div>
+     <div class="col-4"><div class="p-2 rounded" style="background:#FEF3C7"><h5 class="fw-bold mb-0" style="color:#92400E">{{ provider.avg_rating }}</h5><small class="text-muted">Rating</small></div></div>
+    </div>
+   </div>
+  </div>
+  <div class="col-md-8">
+   {% if provider.about %}
+   <div class="card shadow-sm p-4 mb-3">
+    <h5 class="fw-bold mb-3"><i class="fas fa-user-circle me-2 ss-icon"></i>About</h5>
+    <p class="text-muted mb-0">{{ provider.about }}</p>
+   </div>{% endif %}
+   <div class="card shadow-sm p-4 mb-3">
+    <h5 class="fw-bold mb-3"><i class="fas fa-briefcase me-2 ss-icon"></i>Professional Details</h5>
+    <div class="row g-3">
+     {% if provider.education %}<div class="col-md-6"><div class="p-3 rounded" style="background:#f8f9fa"><small class="text-muted d-block mb-1"><i class="fas fa-graduation-cap me-1"></i>Education / Qualification</small><strong>{{ provider.education }}</strong></div></div>{% endif %}
+     {% if provider.specialization %}<div class="col-md-6"><div class="p-3 rounded" style="background:#f8f9fa"><small class="text-muted d-block mb-1"><i class="fas fa-star me-1"></i>Specialization</small><strong>{{ provider.specialization }}</strong></div></div>{% endif %}
+     {% if provider.experience_years %}<div class="col-md-6"><div class="p-3 rounded" style="background:#f8f9fa"><small class="text-muted d-block mb-1"><i class="fas fa-calendar me-1"></i>Experience</small><strong>{{ provider.experience_years }} Years</strong></div></div>{% endif %}
+     {% if provider.workplace_name %}<div class="col-md-6"><div class="p-3 rounded" style="background:#f8f9fa"><small class="text-muted d-block mb-1"><i class="fas fa-hospital me-1"></i>Workplace / Shop</small><strong>{{ provider.workplace_name }}</strong></div></div>{% endif %}
+     {% if provider.workplace_address %}<div class="col-12"><div class="p-3 rounded" style="background:#f8f9fa"><small class="text-muted d-block mb-1"><i class="fas fa-map-marker-alt me-1 text-danger"></i>Full Address</small><span>{{ provider.workplace_address }}</span></div></div>{% endif %}
+    </div>
+   </div>
+   {% if provider.workplace_lat and provider.workplace_lng %}
+   <div class="card shadow-sm p-4 mb-3">
+    <h5 class="fw-bold mb-3"><i class="fas fa-map-marker-alt me-2 text-danger"></i>Location</h5>
+    <div class="ratio ratio-16x9 rounded overflow-hidden mb-2">
+     <iframe src="https://maps.google.com/maps?q={{ provider.workplace_lat }},{{ provider.workplace_lng }}&z=15&output=embed" allowfullscreen loading="lazy" class="border-0"></iframe>
+    </div>
+    <a href="https://maps.google.com/?q={{ provider.workplace_lat }},{{ provider.workplace_lng }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fas fa-directions me-1"></i>Get Directions</a>
+   </div>{% endif %}
+   {% if services %}
+   <div class="card shadow-sm p-4 mb-3">
+    <h5 class="fw-bold mb-3"><i class="fas fa-concierge-bell me-2 ss-icon"></i>Available Services</h5>
+    <div class="row g-2">
+     {% for svc in services %}
+     <div class="col-md-6"><div class="card p-3 h-100" style="border:1px solid #e5e7eb">
+      <h6 class="fw-bold mb-1">{{ svc.name }}</h6>
+      <p class="text-muted small mb-2">{{ svc.description|truncatewords:10 }}</p>
+      <div class="d-flex justify-content-between align-items-center mt-auto">
+       <span class="fw-bold ss-price">₹{{ svc.price }}</span>
+       {% if user.is_authenticated %}<a href="{% url 'booking' svc.pk %}" class="btn btn-primary btn-sm">Book Now</a>
+       {% else %}<a href="{% url 'login' %}" class="btn btn-primary btn-sm">Login to Book</a>{% endif %}
+      </div>
+     </div></div>{% endfor %}
+    </div>
+   </div>{% endif %}
+   <div class="card shadow-sm p-4">
+    <h5 class="fw-bold mb-3"><i class="fas fa-star me-2 text-warning"></i>Customer Reviews ({{ provider.total_reviews }})</h5>
+    {% for rv in reviews %}
+    <div class="border-bottom pb-3 mb-3">
+     <div class="d-flex justify-content-between align-items-start">
+      <div>
+       <strong>{{ rv.user.get_full_name|default:rv.user.username }}</strong>
+       {% if rv.service %}<small class="text-muted ms-2">for {{ rv.service.name }}</small>{% endif %}
+       <div class="my-1">{% for i in "12345" %}<i class="fas fa-star" style="font-size:.8rem;color:{% if forloop.counter <= rv.rating %}#F59E0B{% else %}#D1D5DB{% endif %}"></i>{% endfor %}</div>
+       {% if rv.comment %}<p class="text-muted small mb-0">{{ rv.comment }}</p>{% endif %}
+      </div>
+      <small class="text-muted">{{ rv.created_at|date:"d M Y" }}</small>
+     </div>
+    </div>
+    {% empty %}<p class="text-muted">No reviews yet.</p>{% endfor %}
+   </div>
+  </div>
+ </div>
+</div>{% endblock %}

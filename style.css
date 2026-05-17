@@ -1,0 +1,136 @@
+:root {
+  --ss-primary:#4F46E5; --ss-dark:#3730A3; --ss-accent:#F59E0B;
+  --ss-light:#EEF2FF; --ss-price:#4F46E5;
+}
+[data-bs-theme="dark"] { --ss-light:#1e293b; }
+body { font-family:'Segoe UI',sans-serif; }
+.ss-navbar { background:linear-gradient(135deg,#4F46E5,#3730A3)!important; box-shadow:0 2px 12px rgba(79,70,229,.3); padding:.6rem 0; }
+.ss-navbar .nav-link { font-size:.9rem; padding:.4rem .7rem!important; border-radius:6px; transition:all .2s; }
+.ss-navbar .nav-link:hover,.ss-navbar .nav-link.active { background:rgba(255,255,255,.12); }
+.ss-hero { background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%); padding:80px 0; }
+.stat-pill { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; padding:12px 24px; border-radius:50px; text-align:center; }
+.card { border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); transition:all .25s; }
+.card:hover { box-shadow:0 6px 24px rgba(0,0,0,.10); }
+.ss-cat-card { border:2px solid transparent; border-radius:14px; transition:all .2s; cursor:pointer; }
+.ss-cat-card:hover { border-color:var(--ss-primary); transform:translateY(-3px); }
+.ss-cat-icon { width:48px; height:48px; background:var(--ss-light); border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.ss-cat-icon i { color:var(--ss-primary); font-size:1.2rem; }
+.ss-service-card { border-radius:14px; overflow:hidden; }
+.ss-service-card:hover { transform:translateY(-4px); box-shadow:0 12px 28px rgba(79,70,229,.15)!important; }
+.ss-img-placeholder { height:130px; background:var(--ss-light); display:flex; align-items:center; justify-content:center; }
+.ss-icon { color:var(--ss-primary); }
+.ss-price { color:var(--ss-primary); }
+.ss-step-icon { width:36px; height:36px; background:var(--ss-primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+.ss-badge-pending     { background:#FEF3C7; color:#92400E; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-confirmed   { background:#D1FAE5; color:#065F46; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-in_progress { background:#DBEAFE; color:#1E40AF; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-completed   { background:#D1FAE5; color:#065F46; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-cancelled   { background:#FEE2E2; color:#991B1B; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.btn-primary { background:var(--ss-primary); border-color:var(--ss-primary); }
+.btn-primary:hover { background:var(--ss-dark); border-color:var(--ss-dark); }
+.btn-outline-primary { color:var(--ss-primary); border-color:var(--ss-primary); }
+.btn-outline-primary:hover { background:var(--ss-primary); }
+.form-control:focus,.form-select:focus { border-color:var(--ss-primary); box-shadow:0 0 0 .2rem rgba(79,70,229,.2); }
+.ss-footer { background:#0F172A; } .ss-footer .text-muted { color: #94A3B8 !important; } .ss-footer a { color: #94A3B8; }
+.time-slot-btn { border:2px solid #e5e7eb; border-radius:8px; padding:6px 12px; font-size:.8rem; cursor:pointer; transition:all .2s; background:#fff; color:#374151; }
+.time-slot-btn:hover:not(.booked) { border-color:var(--ss-primary); color:var(--ss-primary); }
+.time-slot-btn.selected { background:var(--ss-primary); color:#fff; border-color:var(--ss-primary); }
+.time-slot-btn.booked { background:#FEE2E2; color:#991B1B; border-color:#FCA5A5; cursor:not-allowed; text-decoration:line-through; }
+.profile-avatar { width:96px; height:96px; border-radius:50%; object-fit:cover; border:4px solid var(--ss-primary); }
+.profile-avatar-placeholder { width:96px; height:96px; border-radius:50%; background:var(--ss-light); display:flex; align-items:center; justify-content:center; border:4px solid var(--ss-primary); }
+.booking-timeline { position:relative; padding-left:30px; }
+.booking-timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:#e5e7eb; }
+.timeline-step { position:relative; margin-bottom:20px; }
+.timeline-dot { position:absolute; left:-24px; width:14px; height:14px; border-radius:50%; border:2px solid var(--ss-primary); background:#fff; }
+.timeline-dot.done { background:var(--ss-primary); }
+@media(max-width:768px){.ss-hero{padding:50px 0;}.display-4{font-size:1.8rem;}}
+
+/* ── Payment App Cards ────────────────────── */
+.pay-app-card{border:2px solid #e5e7eb!important;border-radius:16px!important;transition:all .2s;}
+.pay-app-card:hover{border-color:#4F46E5!important;transform:translateY(-3px);box-shadow:0 6px 20px rgba(79,70,229,.15);}
+/* ── Chat ── */
+#chat-box{scroll-behavior:smooth;}
+#chat-box::-webkit-scrollbar{width:4px;}
+#chat-box::-webkit-scrollbar-thumb{background:#C7D2FE;border-radius:2px;}
+/* ── Provider availability badges ── */
+.badge-available{background:#D1FAE5;color:#065F46;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.badge-busy{background:#FEF3C7;color:#92400E;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.badge-offline{background:#F3F4F6;color:#374151;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+/* ── Slot buttons ── */
+.time-slot-btn{border:2px solid #e5e7eb;border-radius:8px;padding:6px 12px;font-size:.8rem;cursor:pointer;background:#fff;color:#374151;transition:all .2s;}
+.time-slot-btn:hover:not(.booked){border-color:#4F46E5;color:#4F46E5;}
+.time-slot-btn.selected{background:#4F46E5;color:#fff;border-color:#4F46E5;}
+.time-slot-btn.booked{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5;cursor:not-allowed;text-decoration:line-through;}
+/* ── Profile avatar ── */
+.profile-avatar{width:96px;height:96px;border-radius:50%;object-fit:cover;border:4px solid #4F46E5;}
+.profile-avatar-placeholder{width:96px;height:96px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;border:4px solid #4F46E5;}
+/* ── Booking timeline ── */
+.booking-timeline{position:relative;padding-left:30px;}
+.booking-timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:#e5e7eb;}
+.timeline-step{position:relative;margin-bottom:20px;}
+.timeline-dot{position:absolute;left:-24px;width:14px;height:14px;border-radius:50%;border:2px solid #4F46E5;background:#fff;}
+.timeline-dot.done{background:#4F46E5;}
+/* ── Status badges ── */
+.ss-badge-pending{background:#FEF3C7;color:#92400E;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.ss-badge-confirmed{background:#D1FAE5;color:#065F46;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.ss-badge-in_progress{background:#DBEAFE;color:#1E40AF;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.ss-badge-completed{background:#D1FAE5;color:#065F46;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.ss-badge-cancelled{background:#FEE2E2;color:#991B1B;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+.ss-badge-rescheduled{background:#E0E7FF;color:#3730A3;padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
+/* ── Category cards ── */
+.ss-cat-card{border:2px solid transparent;border-radius:14px;transition:all .2s;cursor:pointer;}
+.ss-cat-card:hover{border-color:#4F46E5;transform:translateY(-3px);}
+.ss-cat-icon{width:48px;height:48px;background:#EEF2FF;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.ss-cat-icon i{color:#4F46E5;font-size:1.2rem;}
+/* ── Step icon ── */
+.ss-step-icon{width:36px;height:36px;background:#4F46E5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+.ss-icon{color:#4F46E5;}
+.ss-price{color:#4F46E5;}
+.ss-img-placeholder{height:130px;background:#EEF2FF;display:flex;align-items:center;justify-content:center;}
+.ss-service-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(79,70,229,.15)!important;}
+.ss-navbar{background:linear-gradient(135deg,#4F46E5,#3730A3)!important;box-shadow:0 2px 12px rgba(79,70,229,.3);}
+.ss-hero{background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);padding:80px 0;}
+.stat-pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:12px 24px;border-radius:50px;text-align:center;}
+.ss-footer{background:#0F172A;}
+.btn-primary{background:#4F46E5;border-color:#4F46E5;}
+.btn-primary:hover{background:#3730A3;border-color:#3730A3;}
+/* Footer text visibility fix */
+.ss-footer { background:#0F172A; }
+.ss-footer p, .ss-footer small, .ss-footer a, .ss-footer li { color: #94A3B8 !important; }
+.ss-footer h5, .ss-footer h6 { color: #ffffff !important; }
+.ss-footer a:hover { color: #ffffff !important; }
+/* Time slot fix */
+.time-slot-btn { border:2px solid #cbd5e1; border-radius:8px; padding:6px 14px; font-size:.82rem; cursor:pointer; background:#fff; color:#374151; transition:all .2s; white-space:nowrap; }
+.time-slot-btn:hover:not(.booked) { border-color:#4F46E5; color:#4F46E5; background:#EEF2FF; }
+.time-slot-btn.selected { background:#4F46E5; color:#fff !important; border-color:#4F46E5; }
+.time-slot-btn.booked { background:#FEE2E2; color:#991B1B; border-color:#FCA5A5; cursor:not-allowed; text-decoration:line-through; }
+/* Provider card */
+.booking-timeline { position:relative; padding-left:30px; }
+.booking-timeline::before { content:''; position:absolute; left:10px; top:0; bottom:0; width:2px; background:#e5e7eb; }
+.timeline-step { position:relative; margin-bottom:20px; }
+.timeline-dot { position:absolute; left:-24px; width:14px; height:14px; border-radius:50%; border:2px solid #4F46E5; background:#fff; }
+.timeline-dot.done { background:#4F46E5; }
+/* Status badges */
+.ss-badge-pending { background:#FEF3C7; color:#92400E; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-confirmed { background:#D1FAE5; color:#065F46; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-in_progress { background:#DBEAFE; color:#1E40AF; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-completed { background:#D1FAE5; color:#065F46; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-cancelled { background:#FEE2E2; color:#991B1B; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-badge-rescheduled { background:#E0E7FF; color:#3730A3; padding:4px 12px; border-radius:20px; font-size:.8rem; font-weight:600; }
+.ss-cat-card { border:2px solid transparent; border-radius:14px; transition:all .2s; cursor:pointer; }
+.ss-cat-card:hover { border-color:#4F46E5; transform:translateY(-3px); background:#EEF2FF; }
+.ss-cat-icon { width:48px; height:48px; background:#EEF2FF; border-radius:12px; display:flex; align-items:center; justify-content:center; }
+.ss-cat-icon i { color:#4F46E5; font-size:1.2rem; }
+.ss-step-icon { width:36px; height:36px; background:#4F46E5; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; }
+.ss-icon { color:#4F46E5; }
+.ss-price { color:#4F46E5; }
+.ss-img-placeholder { height:120px; background:#EEF2FF; display:flex; align-items:center; justify-content:center; }
+.ss-service-card:hover { transform:translateY(-4px); box-shadow:0 12px 28px rgba(79,70,229,.15)!important; }
+.ss-navbar { background:linear-gradient(135deg,#4F46E5,#3730A3)!important; box-shadow:0 2px 12px rgba(79,70,229,.3); }
+.ss-hero { background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%); padding:80px 0; }
+.stat-pill { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; padding:12px 24px; border-radius:50px; text-align:center; }
+.btn-primary { background:#4F46E5; border-color:#4F46E5; }
+.btn-primary:hover { background:#3730A3; border-color:#3730A3; }
+.profile-avatar { width:96px; height:96px; border-radius:50%; object-fit:cover; border:4px solid #4F46E5; }
+.profile-avatar-placeholder { width:96px; height:96px; border-radius:50%; background:#EEF2FF; display:flex; align-items:center; justify-content:center; border:4px solid #4F46E5; }
+#chat-box { scroll-behavior:smooth; }

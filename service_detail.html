@@ -1,0 +1,220 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ service.name }} — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5">
+ <nav class="mb-4"><ol class="breadcrumb">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'services' %}">Services</a></li>
+  <li class="breadcrumb-item active">{{ service.name }}</li>
+ </ol></nav>
+ <div class="row g-4">
+  <div class="col-md-8">
+   <div class="card shadow-sm p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+     <div>
+      <span class="badge bg-primary mb-2">{{ service.category.emoji }} {{ service.category.name }}</span>
+      {% if service.category.online_only %}<span class="badge bg-info text-dark mb-2 ms-1"><i class="fas fa-mobile-alt me-1"></i>Online Payment Only</span>{% endif %}
+      <h2 class="fw-bold mb-1">{{ service.name }}</h2>
+      {% if service.specialization %}<p class="text-muted mb-1"><i class="fas fa-user-md me-1"></i>{{ service.specialization }}</p>{% endif %}
+     </div>
+     {% if user.is_authenticated %}
+     <a href="{% url 'toggle_favorite' service.pk %}" class="btn btn-sm {% if is_fav %}btn-danger{% else %}btn-outline-danger{% endif %}">
+      <i class="fas fa-heart me-1"></i>{% if is_fav %}Saved{% else %}Save{% endif %}
+     </a>{% endif %}
+    </div>
+    <div class="d-flex align-items-center gap-2 mb-3">
+     {% with r=service.avg_rating %}
+     <div>{% for i in "12345" %}<i class="fas fa-star" style="color:{% if forloop.counter <= r %}#F59E0B{% else %}#D1D5DB{% endif %}"></i>{% endfor %}</div>
+     <span class="fw-bold">{{ r }}</span><span class="text-muted">({{ service.review_count }} reviews)</span>
+     {% endwith %}
+    </div>
+    <p class="text-muted">{{ service.description }}</p>
+    <div class="row g-3 mt-1">
+     <div class="col-4 text-center"><div class="p-3 rounded" style="background:#EEF2FF"><i class="fas fa-rupee-sign fa-lg ss-icon"></i><h5 class="fw-bold mt-1 mb-0">₹{{ service.price }}</h5><small class="text-muted">Price</small></div></div>
+     <div class="col-4 text-center"><div class="p-3 rounded" style="background:#EEF2FF"><i class="far fa-clock fa-lg ss-icon"></i><h5 class="fw-bold mt-1 mb-0">{{ service.duration_minutes }}</h5><small class="text-muted">Minutes</small></div></div>
+     <div class="col-4 text-center"><div class="p-3 rounded" style="background:#EEF2FF"><i class="fas fa-star fa-lg ss-icon"></i><h5 class="fw-bold mt-1 mb-0">{{ service.review_count }}</h5><small class="text-muted">Reviews</small></div></div>
+    </div>
+   </div>
+
+   <!-- Provider details shown BEFORE booking for Doctor/Tutor -->
+   {% if service.provider %}
+   {% if service.category.name == 'Doctor' or service.category.name == 'Tutor' %}
+   <div class="card shadow-sm p-4 mb-4" style="border-left:4px solid #4F46E5">
+    <h5 class="fw-bold mb-3"><i class="fas fa-user-tie me-2 ss-icon"></i>Your Service Provider</h5>
+    <div class="d-flex align-items-start gap-3">
+     {% if service.provider.profile_pic %}
+     <img src="{{ service.provider.profile_pic.url }}" class="rounded-circle flex-shrink-0" width="72" height="72" style="object-fit:cover;border:3px solid #4F46E5">
+     {% else %}
+     <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width:72px;height:72px;background:#EEF2FF;border:3px solid #4F46E5;font-size:1.5rem">
+      {% if service.category.name == 'Doctor' %}🏥{% else %}🎓{% endif %}
+     </div>{% endif %}
+     <div class="flex-grow-1">
+      <h5 class="fw-bold mb-1">{{ service.provider.full_name }}</h5>
+      {% if service.provider.specialization %}<p class="text-muted mb-1 small"><i class="fas fa-stethoscope me-1"></i>{{ service.provider.specialization }}</p>{% endif %}
+      <div class="row g-2 mt-1">
+       <div class="col-md-6">
+        <div class="p-2 rounded" style="background:#f8f9fa">
+         <small class="text-muted d-block"><i class="fas fa-phone me-1 text-primary"></i>Phone</small>
+         <strong><a href="tel:{{ service.provider.phone }}" class="text-decoration-none">{{ service.provider.phone }}</a></strong>
+        </div>
+       </div>
+       {% if service.provider.education %}
+       <div class="col-md-6">
+        <div class="p-2 rounded" style="background:#f8f9fa">
+         <small class="text-muted d-block"><i class="fas fa-graduation-cap me-1 text-primary"></i>Education</small>
+         <strong style="font-size:.85rem">{{ service.provider.education }}</strong>
+        </div>
+       </div>{% endif %}
+       {% if service.provider.experience_years %}
+       <div class="col-md-6">
+        <div class="p-2 rounded" style="background:#f8f9fa">
+         <small class="text-muted d-block"><i class="fas fa-briefcase me-1 text-primary"></i>Experience</small>
+         <strong>{{ service.provider.experience_years }} Years</strong>
+        </div>
+       </div>{% endif %}
+       {% if service.provider.workplace_name %}
+       <div class="col-md-6">
+        <div class="p-2 rounded" style="background:#f8f9fa">
+         <small class="text-muted d-block"><i class="fas fa-hospital me-1 text-primary"></i>{% if service.category.name == 'Doctor' %}Hospital{% else %}Institute{% endif %}</small>
+         <strong style="font-size:.85rem">{{ service.provider.workplace_name }}</strong>
+        </div>
+       </div>{% endif %}
+       {% if service.provider.workplace_address %}
+       <div class="col-12">
+        <div class="p-2 rounded" style="background:#f8f9fa">
+         <small class="text-muted d-block"><i class="fas fa-map-marker-alt me-1 text-danger"></i>Address</small>
+         <span style="font-size:.85rem">{{ service.provider.workplace_address }}</span>
+        </div>
+       </div>{% endif %}
+       {% if service.provider.emergency_contact and service.category.name == 'Doctor' %}
+       <div class="col-12">
+        <div class="p-2 rounded" style="background:#FEE2E2">
+         <small class="text-danger d-block fw-bold"><i class="fas fa-ambulance me-1"></i>Emergency Contact</small>
+         <a href="tel:{{ service.provider.emergency_contact }}" class="text-danger text-decoration-none fw-bold">{{ service.provider.emergency_contact }}</a>
+        </div>
+       </div>{% endif %}
+      </div>
+      {% if service.provider.languages %}
+      <p class="text-muted small mb-0 mt-2"><i class="fas fa-language me-1"></i>Languages: {{ service.provider.languages }}</p>{% endif %}
+      <div class="mt-2">
+       {% if service.provider.availability == 'available' %}<span class="badge bg-success"><i class="fas fa-circle me-1" style="font-size:.5rem"></i>Available Now</span>
+       {% elif service.provider.availability == 'busy' %}<span class="badge bg-warning text-dark"><i class="fas fa-circle me-1" style="font-size:.5rem"></i>Currently Busy</span>
+       {% else %}<span class="badge bg-secondary">Offline</span>{% endif %}
+       {% if service.provider.verified %}<span class="badge bg-success ms-1"><i class="fas fa-check-circle me-1"></i>Verified</span>{% endif %}
+      </div>
+      <a href="{% url 'provider_detail' service.provider.pk %}" class="btn btn-outline-primary btn-sm mt-2">View Full Profile →</a>
+     </div>
+    </div>
+   </div>{% endif %}{% endif %}
+
+   <!-- Reviews Section -->
+   <div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-bold mb-3">⭐ Customer Reviews ({{ service.review_count }})</h5>
+    {% for rev in reviews %}
+    <div class="border-bottom pb-3 mb-3">
+     <div class="d-flex justify-content-between align-items-start">
+      <div>
+       <strong>{{ rev.user.get_full_name|default:rev.user.username }}</strong>
+       <div class="my-1">{% for i in "12345" %}<i class="fas fa-star" style="font-size:.8rem;color:{% if forloop.counter <= rev.rating %}#F59E0B{% else %}#D1D5DB{% endif %}"></i>{% endfor %}</div>
+       {% if rev.comment %}<p class="text-muted small mb-0">{{ rev.comment }}</p>{% endif %}
+      </div>
+      <small class="text-muted">{{ rev.created_at|date:"d M Y" }}</small>
+     </div>
+    </div>
+    {% empty %}<p class="text-muted">No reviews yet. Complete a booking to leave a review.</p>{% endfor %}
+
+    <!-- Review Form - only for eligible users (completed booking, not yet reviewed) -->
+    {% if can_review %}
+    <div class="mt-3 p-3 rounded" style="background:#EEF2FF;border:1px solid #C7D2FE">
+     <h6 class="fw-bold mb-3"><i class="fas fa-star me-1 text-warning"></i>Rate Your Experience</h6>
+     <form method="POST" action="{% url 'add_review' service.pk %}" novalidate>{% csrf_token %}
+      <div class="mb-3">
+       <label class="form-label fw-semibold small">Select Rating</label>
+       <div id="star-rating-ui" class="mb-2 d-flex gap-1"></div>
+       <input type="hidden" id="id_rating" name="rating" value="">
+       <div id="rating-error" class="text-danger small" style="display:none">Please click a star to rate.</div>
+      </div>
+      <div class="mb-3">
+       <label class="form-label fw-semibold small">Your Review (optional)</label>
+       <textarea name="comment" class="form-control" rows="3" placeholder="Share your experience with this service..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-warning fw-bold px-4" onclick="return validateRating()">
+       <i class="fas fa-paper-plane me-1"></i>Submit Review
+      </button>
+     </form>
+    </div>
+    {% elif user.is_authenticated %}
+    <div class="alert alert-info py-2 mb-0 mt-2">
+     <i class="fas fa-info-circle me-1"></i>
+     Reviews are available only after a <strong>completed booking</strong> for this service.
+    </div>{% endif %}
+   </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="col-md-4">
+   <div class="card shadow-sm p-4 mb-3 sticky-top" style="top:80px">
+    <h5 class="fw-bold mb-1">₹{{ service.price }} <span class="text-muted fw-normal fs-6">/ session</span></h5>
+    <p class="text-muted small mb-3"><i class="far fa-clock me-1"></i>{{ service.duration_minutes }} min session</p>
+    {% if service.category.online_only %}
+    <div class="alert alert-info py-2 mb-3 small"><i class="fas fa-mobile-alt me-1"></i>This service requires <strong>online payment</strong> (UPI/Card). Cash not accepted.</div>
+    {% endif %}
+    {% if user.is_authenticated %}
+    <a href="{% url 'booking' service.pk %}" class="btn btn-primary btn-lg w-100 fw-bold mb-2"><i class="fas fa-calendar-plus me-2"></i>Book Now</a>
+    {% else %}
+    <a href="{% url 'login' %}" class="btn btn-primary btn-lg w-100 fw-bold mb-2"><i class="fas fa-sign-in-alt me-2"></i>Login to Book</a>
+    <p class="text-center text-muted small"><a href="{% url 'register' %}">Create free account</a></p>{% endif %}
+    <hr>
+    <ul class="list-unstyled small text-muted">
+     <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Verified professionals</li>
+     <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Time slots 9AM–6PM</li>
+     <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Instant confirmation</li>
+     <li><i class="fas fa-check-circle text-success me-2"></i>Cancel anytime</li>
+    </ul>
+    {% if service.provider %}
+    <hr>
+    <div class="d-flex align-items-center gap-2">
+     <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center" style="width:36px;height:36px;flex-shrink:0">
+      <i class="fas fa-user text-white"></i>
+     </div>
+     <div><small class="fw-bold d-block">{{ service.provider.full_name }}</small>
+      <small class="text-muted">{{ service.provider.experience_years }} yrs experience</small></div>
+    </div>{% endif %}
+   </div>
+   {% if related %}
+   <div class="card shadow-sm p-3">
+    <h6 class="fw-bold mb-3">Similar Services</h6>
+    {% for s in related %}
+    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+     <div><p class="fw-bold mb-0 small">{{ s.name }}</p><small class="text-muted">₹{{ s.price }}</small></div>
+     <a href="{% url 'service_detail' s.pk %}" class="btn btn-outline-primary btn-sm">View</a>
+    </div>{% endfor %}
+   </div>{% endif %}
+  </div>
+ </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  const ratingInp=document.getElementById('id_rating');
+  const starUI=document.getElementById('star-rating-ui');
+  if(starUI&&ratingInp){
+    for(let i=1;i<=5;i++){
+      const s=document.createElement('i');
+      s.className='fas fa-star fa-2x'; s.style.cursor='pointer'; s.style.color='#D1D5DB'; s.dataset.v=i;
+      s.addEventListener('click',function(){ratingInp.value=this.dataset.v;paint(this.dataset.v);document.getElementById('rating-error').style.display='none';});
+      s.addEventListener('mouseover',function(){paint(this.dataset.v);});
+      starUI.appendChild(s);
+    }
+    starUI.addEventListener('mouseleave',()=>paint(ratingInp.value||0));
+    function paint(v){starUI.querySelectorAll('i').forEach((s,i)=>s.style.color=i<v?'#F59E0B':'#D1D5DB');}
+  }
+});
+function validateRating(){
+  const v=document.getElementById('id_rating').value;
+  if(!v||v<1||v>5){document.getElementById('rating-error').style.display='block';return false;}
+  return true;
+}
+</script>
+{% endblock %}

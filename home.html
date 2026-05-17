@@ -1,0 +1,93 @@
+{% extends 'core/base.html' %}
+{% block title %}SmartService — Book Services Online{% endblock %}
+{% block content %}
+<section class="ss-hero">
+ <div class="container text-center py-5">
+  <h1 class="display-4 fw-bold text-white mb-3">Find & Book Services Instantly</h1>
+  <p class="lead text-white opacity-75 mb-4">🏥 Doctors · 🚗 Mechanics · 🎓 Tutors · 🔧 Plumbers · ⚡ Electricians & More</p>
+  <form method="GET" action="{% url 'services' %}" class="d-flex justify-content-center mb-5">
+   <div class="input-group shadow-lg" style="max-width:550px">
+    <input type="text" name="q" class="form-control form-control-lg border-0" placeholder="Search doctor, mechanic, tutor...">
+    <button class="btn btn-warning btn-lg px-4 fw-bold" type="submit"><i class="fas fa-search"></i></button>
+   </div>
+  </form>
+  <div class="row justify-content-center g-3">
+   <div class="col-auto"><div class="stat-pill"><span class="fw-bold fs-4">{{ total_services }}+</span><small class="d-block">Services</small></div></div>
+   <div class="col-auto"><div class="stat-pill"><span class="fw-bold fs-4">{{ total_bookings }}+</span><small class="d-block">Bookings</small></div></div>
+   <div class="col-auto"><div class="stat-pill"><span class="fw-bold fs-4">{{ total_users }}+</span><small class="d-block">Users</small></div></div>
+  </div>
+ </div>
+</section>
+<section class="py-5 bg-white">
+ <div class="container">
+  <div class="text-center mb-4"><h2 class="fw-bold">Browse by Category</h2><p class="text-muted">Choose from our wide range of professional services</p></div>
+  <div class="row g-3 justify-content-center">
+   {% for cat in categories %}
+   <div class="col-6 col-md-3 col-lg-2">
+    <a href="{% url 'services' %}?category={{ cat.id }}" class="text-decoration-none">
+     <div class="card text-center p-3 h-100 ss-cat-card">
+      <div class="ss-cat-icon mx-auto mb-2"><i class="fas {{ cat.icon }} fa-lg"></i></div>
+      <span class="fs-4 mb-1">{{ cat.emoji }}</span>
+      <h6 class="fw-bold mb-1 small">{{ cat.name }}</h6>
+      <small class="text-muted">{{ cat.sc }} services</small>
+     </div>
+    </a>
+   </div>{% endfor %}
+  </div>
+  <div class="text-center mt-4"><a href="{% url 'services' %}" class="btn btn-outline-primary px-4">View All Services <i class="fas fa-arrow-right ms-2"></i></a></div>
+ </div>
+</section>
+<section class="py-5" style="background:#F8FAFC">
+ <div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+   <div><h2 class="fw-bold mb-0">⭐ Top Rated Services</h2><p class="text-muted mb-0">Highest rated by our customers</p></div>
+   <a href="{% url 'services' %}?sort=rating" class="btn btn-outline-primary btn-sm">View All →</a>
+  </div>
+  <div class="row g-3">
+   {% for svc in featured_services %}
+   <div class="col-md-2">
+    <div class="card h-100 ss-service-card">
+     {% if svc.image %}<img src="{{ svc.image.url }}" class="card-img-top" style="height:110px;object-fit:cover">
+     {% else %}<div class="ss-img-placeholder"><i class="fas {{ svc.category.icon }} fa-2x ss-icon"></i></div>{% endif %}
+     <div class="card-body p-2">
+      <span class="badge bg-primary mb-1" style="font-size:.65rem">{{ svc.category.emoji }} {{ svc.category.name }}</span>
+      <h6 class="fw-bold mb-1" style="font-size:.82rem">{{ svc.name }}</h6>
+      <div class="d-flex align-items-center gap-1 mb-1">
+       {% with r=svc.avg_rating %}{% for i in "12345" %}<i class="fas fa-star" style="font-size:.65rem;color:{% if forloop.counter <= r %}#F59E0B{% else %}#D1D5DB{% endif %}"></i>{% endfor %}<small class="text-muted" style="font-size:.7rem">({{ svc.review_count }})</small>{% endwith %}
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+       <span class="fw-bold ss-price" style="font-size:.88rem">₹{{ svc.price }}</span>
+       <small class="text-muted" style="font-size:.7rem"><i class="far fa-clock me-1"></i>{{ svc.duration_minutes }}m</small>
+      </div>
+     </div>
+     <div class="card-footer bg-white border-0 pb-2 px-2">
+      {% if user.is_authenticated %}<a href="{% url 'booking' svc.pk %}" class="btn btn-primary btn-sm w-100" style="font-size:.75rem">Book Now</a>
+      {% else %}<a href="{% url 'login' %}" class="btn btn-primary btn-sm w-100" style="font-size:.75rem">Login to Book</a>{% endif %}
+     </div>
+    </div>
+   </div>{% endfor %}
+  </div>
+ </div>
+</section>
+<section class="py-5 bg-white">
+ <div class="container">
+  <h2 class="fw-bold text-center mb-5">How It Works</h2>
+  <div class="row g-4 text-center">
+   <div class="col-md-3"><div class="card p-4 h-100 border-0 shadow-sm" style="border-radius:16px"><div class="ss-step-icon mx-auto mb-3">1</div><i class="fas fa-search fa-2x ss-icon mb-3"></i><h5 class="fw-bold">Search</h5><p class="text-muted small mb-0">Browse categories or search for any service.</p></div></div>
+   <div class="col-md-3"><div class="card p-4 h-100 border-0 shadow-sm" style="border-radius:16px"><div class="ss-step-icon mx-auto mb-3">2</div><i class="fas fa-calendar-alt fa-2x ss-icon mb-3"></i><h5 class="fw-bold">Book</h5><p class="text-muted small mb-0">Choose date and available time slot.</p></div></div>
+   <div class="col-md-3"><div class="card p-4 h-100 border-0 shadow-sm" style="border-radius:16px"><div class="ss-step-icon mx-auto mb-3">3</div><i class="fas fa-user-check fa-2x ss-icon mb-3"></i><h5 class="fw-bold">Confirm</h5><p class="text-muted small mb-0">Receive instant booking confirmation.</p></div></div>
+   <div class="col-md-3"><div class="card p-4 h-100 border-0 shadow-sm" style="border-radius:16px"><div class="ss-step-icon mx-auto mb-3">4</div><i class="fas fa-star fa-2x ss-icon mb-3"></i><h5 class="fw-bold">Review</h5><p class="text-muted small mb-0">Rate your experience and help others.</p></div></div>
+  </div>
+ </div>
+</section>
+{% if not user.is_authenticated %}
+<section class="py-5" style="background:linear-gradient(135deg,#4F46E5,#7C3AED)">
+ <div class="container text-center text-white">
+  <h3 class="fw-bold mb-2">Ready to book your first service?</h3>
+  <p class="opacity-75 mb-4">Join thousands of happy customers.</p>
+  <a href="{% url 'register' %}" class="btn btn-warning btn-lg px-5 me-2 fw-bold"><i class="fas fa-user-plus me-2"></i>Register Free</a>
+  <a href="{% url 'services' %}" class="btn btn-outline-light btn-lg px-5"><i class="fas fa-th-large me-2"></i>Browse Services</a>
+ </div>
+</section>
+{% endif %}
+{% endblock %}

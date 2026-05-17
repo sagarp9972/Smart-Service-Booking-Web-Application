@@ -1,0 +1,100 @@
+{% extends 'core/base.html' %}
+{% block title %}My Profile — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5">
+ <div class="row g-4">
+  <div class="col-md-4">
+   <div class="card shadow-sm p-4 text-center">
+    {% if user.profile_pic %}<img src="{{ user.profile_pic.url }}" class="profile-avatar mx-auto d-block mb-3" alt="Profile">
+    {% else %}<div class="profile-avatar-placeholder mx-auto mb-3"><i class="fas fa-user fa-3x text-primary"></i></div>{% endif %}
+    <h4 class="fw-bold mb-0">{{ user.get_full_name|default:user.username }}</h4>
+    <p class="text-muted mb-2">@{{ user.username }}</p>
+    <span class="badge bg-primary px-3 py-2 mb-3">{{ user.get_role_display }}</span>
+    <hr>
+    {% if user.email %}<p class="text-muted small mb-1"><i class="fas fa-envelope me-2 text-primary"></i>{{ user.email }}</p>{% endif %}
+    {% if user.phone %}<p class="text-muted small mb-1"><i class="fas fa-phone me-2 text-primary"></i>{{ user.phone }}</p>{% endif %}
+    {% if user.address %}<p class="text-muted small mb-1"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ user.address|truncatewords:5 }}</p>{% endif %}
+    <p class="text-muted small mb-0"><i class="fas fa-calendar me-2 text-primary"></i>Joined {{ user.date_joined|date:"d M Y" }}</p>
+    {% if user.bio %}<p class="text-muted small mt-2 border-top pt-2">{{ user.bio }}</p>{% endif %}
+    <div class="d-flex gap-2 mt-3">
+     <a href="{% url 'edit_profile' %}" class="btn btn-primary flex-fill btn-sm"><i class="fas fa-edit me-1"></i>Edit Profile</a>
+     <a href="{% url 'change_password' %}" class="btn btn-outline-secondary flex-fill btn-sm"><i class="fas fa-key me-1"></i>Password</a>
+    </div>
+   </div>
+   <div class="card shadow-sm p-3 mt-3">
+    <h6 class="fw-bold mb-3">📊 Booking Summary</h6>
+    <div class="row g-2">
+     <div class="col-6"><div class="text-center p-2 rounded" style="background:var(--ss-light)"><h5 class="fw-bold ss-price mb-0">{{ stats.total }}</h5><small class="text-muted">Total</small></div></div>
+     <div class="col-6"><div class="text-center p-2 rounded" style="background:#FEF3C7"><h5 class="fw-bold mb-0" style="color:#92400E">{{ stats.pending }}</h5><small class="text-muted">Pending</small></div></div>
+     <div class="col-6"><div class="text-center p-2 rounded" style="background:#D1FAE5"><h5 class="fw-bold mb-0" style="color:#065F46">{{ stats.confirmed }}</h5><small class="text-muted">Confirmed</small></div></div>
+     <div class="col-6"><div class="text-center p-2 rounded" style="background:#DBEAFE"><h5 class="fw-bold mb-0" style="color:#1E40AF">{{ stats.completed }}</h5><small class="text-muted">Completed</small></div></div>
+    </div>
+   </div>
+  </div>
+  <div class="col-md-8">
+   <ul class="nav nav-tabs mb-4" id="profileTabs">
+    <li class="nav-item"><button class="nav-link active fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-bookings"><i class="fas fa-calendar-check me-1"></i>Recent Bookings</button></li>
+    <li class="nav-item"><button class="nav-link fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-favs"><i class="fas fa-heart me-1"></i>Favorites</button></li>
+    <li class="nav-item"><button class="nav-link fw-semibold" data-bs-toggle="tab" data-bs-target="#tab-revs"><i class="fas fa-star me-1"></i>My Reviews</button></li>
+   </ul>
+   <div class="tab-content">
+    <div class="tab-pane fade show active" id="tab-bookings">
+     <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Recent Bookings</h5>
+      <a href="{% url 'booking_history' %}" class="btn btn-sm btn-outline-primary">View All →</a>
+     </div>
+     {% for bk in bookings %}
+     <div class="card p-3 mb-2">
+      <div class="d-flex justify-content-between align-items-start">
+       <div>
+        <h6 class="fw-bold mb-1">{{ bk.service.name }}</h6>
+        <small class="text-muted"><i class="far fa-calendar me-1"></i>{{ bk.date }} <i class="far fa-clock ms-2 me-1"></i>{{ bk.time }}</small>
+        <br><small class="text-muted">₹{{ bk.get_final_price }}</small>
+       </div>
+       <div class="text-end">
+        <span class="ss-badge-{{ bk.status }}">{{ bk.get_status_display }}</span><br>
+        <a href="{% url 'booking_detail' bk.pk %}" class="btn btn-sm btn-outline-primary mt-1" style="font-size:.75rem">Details</a>
+       </div>
+      </div>
+     </div>
+     {% empty %}<p class="text-muted text-center py-3">No bookings yet. <a href="{% url 'services' %}">Browse services</a></p>{% endfor %}
+    </div>
+    <div class="tab-pane fade" id="tab-favs">
+     <h5 class="fw-bold mb-3">❤️ Favorite Services</h5>
+     <div class="row g-3">
+      {% for fv in favorites %}
+      <div class="col-md-6">
+       <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-start">
+         <div>
+          <span class="badge bg-primary mb-1" style="font-size:.7rem">{{ fv.service.category.name }}</span>
+          <h6 class="fw-bold mb-1">{{ fv.service.name }}</h6>
+          <span class="ss-price fw-bold">₹{{ fv.service.price }}</span>
+         </div>
+         <a href="{% url 'booking' fv.service.pk %}" class="btn btn-primary btn-sm">Book</a>
+        </div>
+       </div>
+      </div>
+      {% empty %}<div class="col-12 text-center py-4"><i class="fas fa-heart fa-3x text-muted mb-2 d-block"></i><p class="text-muted">No favorites yet.</p></div>{% endfor %}
+     </div>
+    </div>
+    <div class="tab-pane fade" id="tab-revs">
+     <h5 class="fw-bold mb-3">⭐ My Reviews</h5>
+     {% for rv in reviews %}
+     <div class="card p-3 mb-2">
+      <div class="d-flex justify-content-between">
+       <div>
+        <h6 class="fw-bold mb-1">{{ rv.service.name }}</h6>
+        <div class="mb-1">{% for i in "12345" %}<i class="fas fa-star" style="font-size:.85rem;color:{% if forloop.counter <= rv.rating %}#F59E0B{% else %}#D1D5DB{% endif %}"></i>{% endfor %}<small class="text-muted ms-1">{{ rv.rating }}/5</small></div>
+        {% if rv.comment %}<p class="text-muted small mb-0">{{ rv.comment }}</p>{% endif %}
+       </div>
+       <small class="text-muted">{{ rv.created_at|date:"d M Y" }}</small>
+      </div>
+     </div>
+     {% empty %}<div class="text-center py-4"><i class="fas fa-star fa-3x text-muted mb-2 d-block"></i><p class="text-muted">No reviews yet.</p></div>{% endfor %}
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+{% endblock %}

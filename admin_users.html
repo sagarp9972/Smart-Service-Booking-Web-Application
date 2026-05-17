@@ -1,0 +1,31 @@
+{% extends 'core/base.html' %}
+{% block title %}All Users — Admin{% endblock %}
+{% block content %}
+<div class="container py-4">
+ <div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="fw-bold mb-0">👥 All Users</h2>
+  <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+ </div>
+ <div class="card shadow-sm">
+  <div class="table-responsive">
+   <table class="table table-hover align-middle mb-0">
+    <thead class="table-light"><tr><th>#</th><th>Username</th><th>Full Name</th><th>Email</th><th>Phone</th><th>Bookings</th><th>Role</th><th>Joined</th></tr></thead>
+    <tbody>
+     {% for u in users %}
+     <tr>
+      <td>{{ u.pk }}</td>
+      <td><strong>{{ u.username }}</strong></td>
+      <td>{{ u.get_full_name|default:"—" }}</td>
+      <td>{{ u.email|default:"—" }}</td>
+      <td>{{ u.phone|default:"—" }}</td>
+      <td><span class="badge bg-info text-dark">{{ u.bc }}</span></td>
+      <td><span class="badge bg-primary">{{ u.get_role_display }}</span></td>
+      <td><small class="text-muted">{{ u.date_joined|date:"d M Y" }}</small></td>
+     </tr>
+     {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">No users registered yet.</td></tr>{% endfor %}
+    </tbody>
+   </table>
+  </div>
+ </div>
+</div>
+{% endblock %}

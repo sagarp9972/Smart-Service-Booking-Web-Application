@@ -1,0 +1,95 @@
+{% extends 'core/base.html' %}
+{% block title %}Payment — SmartService{% endblock %}
+{% block content %}
+<div class="container py-5"><div class="row justify-content-center"><div class="col-md-7">
+ <div class="card shadow-sm p-4">
+  <div class="d-flex align-items-center mb-4">
+   <a href="{% url 'booking_history' %}" class="btn btn-outline-secondary btn-sm me-3">← Cancel</a>
+   <div><h3 class="fw-bold mb-0">Complete Payment</h3><small class="text-muted">Booking #{{ booking.pk }} · {{ booking.service.name }}</small></div>
+  </div>
+  <!-- Amount Banner -->
+  <div class="p-4 rounded mb-4 text-center" style="background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff">
+   <p class="mb-1 opacity-75 small">Amount to Pay</p>
+   <h2 class="fw-bold mb-0">₹{{ amount }}</h2>
+   <div class="mt-2"><small class="opacity-75"><i class="fas fa-lock me-1"></i>Secure Payment</small></div>
+  </div>
+  <!-- UPI Apps -->
+  <h5 class="fw-bold mb-3"><i class="fas fa-mobile-alt me-2 text-primary"></i>Pay via Mobile Banking App</h5>
+  <div class="row g-3 mb-4">
+   <div class="col-6">
+    <a href="{{ gpay_link }}" class="text-decoration-none">
+     <div class="card p-3 text-center h-100" style="border:2px solid #e5e7eb;border-radius:16px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#4F46E5';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#e5e7eb';this.style.transform='translateY(0)'">
+      <div class="mb-2" style="font-size:2.2rem">🅖</div>
+      <h6 class="fw-bold mb-1">Google Pay</h6>
+      <small class="text-muted">Tap to open GPay</small>
+     </div>
+    </a>
+   </div>
+   <div class="col-6">
+    <a href="{{ phonepe_link }}" class="text-decoration-none">
+     <div class="card p-3 text-center h-100" style="border:2px solid #e5e7eb;border-radius:16px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#5f259f';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#e5e7eb';this.style.transform='translateY(0)'">
+      <div class="mb-2"><div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#5f259f"><span style="color:#fff;font-weight:900;font-size:1rem">Pe</span></div></div>
+      <h6 class="fw-bold mb-1">PhonePe</h6>
+      <small class="text-muted">Tap to open PhonePe</small>
+     </div>
+    </a>
+   </div>
+   <div class="col-6">
+    <a href="{{ paytm_link }}" class="text-decoration-none">
+     <div class="card p-3 text-center h-100" style="border:2px solid #e5e7eb;border-radius:16px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#00BAF2';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#e5e7eb';this.style.transform='translateY(0)'">
+      <div class="mb-2"><div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width:44px;height:44px;background:#00BAF2"><span style="color:#fff;font-weight:900;font-size:.85rem">Pay</span></div></div>
+      <h6 class="fw-bold mb-1">Paytm</h6>
+      <small class="text-muted">Tap to open Paytm</small>
+     </div>
+    </a>
+   </div>
+   <div class="col-6">
+    <a href="{{ upi_base }}" class="text-decoration-none">
+     <div class="card p-3 text-center h-100" style="border:2px solid #e5e7eb;border-radius:16px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='#4F46E5';this.style.transform='translateY(-3px)'" onmouseout="this.style.borderColor='#e5e7eb';this.style.transform='translateY(0)'">
+      <div class="mb-2"><i class="fas fa-university fa-2x text-success"></i></div>
+      <h6 class="fw-bold mb-1">Any UPI App</h6>
+      <small class="text-muted">BHIM, Bank UPI etc.</small>
+     </div>
+    </a>
+   </div>
+  </div>
+  <!-- UPI ID -->
+  <div class="p-3 rounded mb-4 text-center" style="background:#f8f9fa;border:2px dashed #4F46E5">
+   <h6 class="fw-bold mb-2"><i class="fas fa-id-card me-2 text-primary"></i>UPI ID to Pay</h6>
+   <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded" style="background:#EEF2FF">
+    <code class="fw-bold text-primary fs-5" id="upi-id-val">{{ upi_id }}</code>
+    <button type="button" class="btn btn-sm p-1 border-0" onclick="copyUPI()" title="Copy UPI ID"><i class="fas fa-copy text-primary"></i></button>
+   </div>
+   <p class="text-muted small mt-2 mb-0">Amount: <strong>₹{{ amount }}</strong> · Note: <strong>{{ pay_note }}</strong></p>
+  </div>
+  <!-- Confirm Payment -->
+  <h5 class="fw-bold mb-3"><i class="fas fa-check-circle me-2 text-success"></i>Confirm Your Payment</h5>
+  <form method="POST" novalidate>{% csrf_token %}
+   <div class="mb-3">
+    <label class="form-label fw-semibold">Transaction ID / UTR Number <span class="text-muted fw-normal">(recommended)</span></label>
+    {{ form.transaction_id }}
+    <small class="text-muted">Enter the 12-digit UTR from your payment app</small>
+   </div>
+   <div class="alert alert-warning py-2 mb-3 small">
+    <i class="fas fa-info-circle me-1"></i><strong>Steps:</strong> 1. Open any UPI app above → 2. Pay ₹{{ amount }} → 3. Enter Transaction ID → 4. Click "I Have Paid"
+   </div>
+   <div class="d-flex gap-2">
+    <a href="{% url 'cancel_booking' booking.pk %}" class="btn btn-outline-danger flex-fill" onclick="return confirm('Cancel booking?')">Cancel Booking</a>
+    <button type="submit" class="btn btn-success flex-fill btn-lg fw-bold"><i class="fas fa-check me-1"></i>I Have Paid ₹{{ amount }}</button>
+   </div>
+  </form>
+ </div>
+</div></div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function copyUPI(){
+  const v=document.getElementById('upi-id-val').textContent;
+  navigator.clipboard.writeText(v).then(()=>{
+    const b=event.target.closest('button');
+    b.innerHTML='<i class="fas fa-check text-success"></i>';
+    setTimeout(()=>b.innerHTML='<i class="fas fa-copy text-primary"></i>',2000);
+  });
+}
+</script>
+{% endblock %}
