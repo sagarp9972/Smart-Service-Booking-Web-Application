@@ -276,7 +276,7 @@ http://127.0.0.1:8000
 | Role | Username | Password | Access |
 |---|---|---|---|
 | Admin | `admin` | `admin123` | Full admin dashboard |
-| User | `sagar` | `sagar123` | Book services, profile |
+| User | ------ | ----- | ----------|
 
 ### Admin Panel
 ```
@@ -299,7 +299,6 @@ http://127.0.0.1:8000/dashboard/
 | Categories | 8 |
 | Services | 67 |
 | Service Providers | 67 (one per service) |
-| Users | 2 (admin + sagar) |
 
 ### Categories
 | # | Category | Services | Notes |
